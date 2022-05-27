@@ -1,0 +1,9 @@
+{
+	"name": "firstTestJDCareAbout",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "0b398b46-b268-4b13-b573-59275a4e636d",
+		"tenantId": "c192b9ab-9b78-49ab-b323-5f11f3860e7c"
+	}
+}
