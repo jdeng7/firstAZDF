@@ -1,0 +1,41 @@
+{
+	"name": "a4eoutput",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "outputsql",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ColA",
+				"type": "varchar"
+			},
+			{
+				"name": "ColB",
+				"type": "varchar"
+			},
+			{
+				"name": "ColC",
+				"type": "varchar"
+			},
+			{
+				"name": "ColD",
+				"type": "varchar"
+			},
+			{
+				"name": "ColE",
+				"type": "varchar"
+			},
+			{
+				"name": "ColF",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "a4etbl"
+		}
+	}
+}
