@@ -82,6 +82,7 @@
 					},
 					"sink": {
 						"type": "SqlPoolSink",
+						"preCopyScript": "TRUNCATE TABLE [PAYOR_DATA].[FidelisCare_DentalLine_stg]",
 						"allowCopyCommand": true
 					},
 					"enableStaging": false
