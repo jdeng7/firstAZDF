@@ -1,0 +1,72 @@
+{
+	"name": "Notebook 1",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "cpsparkpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "f46c694a-9ad9-4564-b924-f5a342bd333c"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/dea20f13-b8a2-4c09-9cfe-b902ec798126/resourceGroups/AZR-SYNAPSE-RG/providers/Microsoft.Synapse/workspaces/cpsynapsews/bigDataPools/cpsparkpool",
+				"name": "cpsparkpool",
+				"type": "Spark",
+				"endpoint": "https://cpsynapsews.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/cpsparkpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 3,
+				"cores": 8,
+				"memory": 56,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"microsoft": {
+						"language": "python"
+					}
+				},
+				"source": [
+					"%%pyspark\n",
+					"spark.sql(\"CREATE TABLE IF NOT EXISTS default.demoApache USING Parquet LOCATION 'abfss://cpdlfilesystem@cpdlstorage.dfs.core.windows.net/demoPark/part-00000-2054a8b6-6224-4723-96b1-7ca3d59d6880-c000.snappy.parquet'\")"
+				],
+				"attachments": null,
+				"execution_count": 1
+			}
+		]
+	}
+}

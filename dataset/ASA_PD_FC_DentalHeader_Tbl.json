@@ -1,0 +1,188 @@
+{
+	"name": "ASA_PD_FC_DentalHeader_Tbl",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "cpsynapsews-WorkspaceDefaultSqlServer",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"DBName": "cpsqlpool"
+			}
+		},
+		"folder": {
+			"name": "James"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [
+			{
+				"name": "FileName",
+				"type": "varchar"
+			},
+			{
+				"name": "claim_id",
+				"type": "varchar"
+			},
+			{
+				"name": "billing_provider_id",
+				"type": "varchar"
+			},
+			{
+				"name": "rendering_provider_id",
+				"type": "varchar"
+			},
+			{
+				"name": "first_date_of_service",
+				"type": "varchar"
+			},
+			{
+				"name": "last_date_of_service",
+				"type": "varchar"
+			},
+			{
+				"name": "member_id",
+				"type": "varchar"
+			},
+			{
+				"name": "patient_dob",
+				"type": "varchar"
+			},
+			{
+				"name": "patient_gender",
+				"type": "varchar"
+			},
+			{
+				"name": "patient_zip_code",
+				"type": "varchar"
+			},
+			{
+				"name": "line_of_business",
+				"type": "varchar"
+			},
+			{
+				"name": "product",
+				"type": "varchar"
+			},
+			{
+				"name": "blue_card_identifier",
+				"type": "varchar"
+			},
+			{
+				"name": "total_charge",
+				"type": "varchar"
+			},
+			{
+				"name": "allowed_amount",
+				"type": "varchar"
+			},
+			{
+				"name": "member_responsibility",
+				"type": "varchar"
+			},
+			{
+				"name": "plan_paid",
+				"type": "varchar"
+			},
+			{
+				"name": "icd_version",
+				"type": "varchar"
+			},
+			{
+				"name": "diagnosis_1",
+				"type": "varchar"
+			},
+			{
+				"name": "diagnosis_2",
+				"type": "varchar"
+			},
+			{
+				"name": "diagnosis_3",
+				"type": "varchar"
+			},
+			{
+				"name": "diagnosis_4",
+				"type": "varchar"
+			},
+			{
+				"name": "diagnosis_5",
+				"type": "varchar"
+			},
+			{
+				"name": "diagnosis_6",
+				"type": "varchar"
+			},
+			{
+				"name": "diagnosis_7",
+				"type": "varchar"
+			},
+			{
+				"name": "diagnosis_8",
+				"type": "varchar"
+			},
+			{
+				"name": "diagnosis_9",
+				"type": "varchar"
+			},
+			{
+				"name": "diagnosis_10",
+				"type": "varchar"
+			},
+			{
+				"name": "diagnosis_11",
+				"type": "varchar"
+			},
+			{
+				"name": "payment_methodology",
+				"type": "varchar"
+			},
+			{
+				"name": "source_system",
+				"type": "varchar"
+			},
+			{
+				"name": "primary_payer",
+				"type": "varchar"
+			},
+			{
+				"name": "adjustment_claim_indicator",
+				"type": "varchar"
+			},
+			{
+				"name": "adjusted_claim_id",
+				"type": "varchar"
+			},
+			{
+				"name": "employer_id",
+				"type": "varchar"
+			},
+			{
+				"name": "paid_date",
+				"type": "varchar"
+			},
+			{
+				"name": "posted_date",
+				"type": "varchar"
+			},
+			{
+				"name": "claim_status",
+				"type": "varchar"
+			},
+			{
+				"name": "denial_reason",
+				"type": "varchar"
+			},
+			{
+				"name": "member_pcp_id",
+				"type": "varchar"
+			},
+			{
+				"name": "member_pcp_id_npi",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "PAYOR_DATA",
+			"table": "FidelisCare_DentalHeader_stg"
+		}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

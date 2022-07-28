@@ -1,0 +1,26 @@
+{
+	"name": "LakeDatabaseTest",
+	"properties": {
+		"Name": "LakeDatabaseTest",
+		"EntityType": "DATABASE",
+		"Origin": {
+			"Type": "SPARK"
+		},
+		"Properties": {
+			"IsSyMSCDMDatabase": true
+		},
+		"Description": "For Test",
+		"Source": {
+			"Provider": "ADLS",
+			"Location": "abfss://cpdlfilesystem@cpdlstorage.dfs.core.windows.net/LakeDatabaseTest",
+			"Properties": {
+				"FormatType": "csv",
+				"LinkedServiceName": "cpsynapsews-WorkspaceDefaultStorage"
+			}
+		},
+		"PublishStatus": "PUBLISHED",
+		"ObjectVersion": 1,
+		"ObjectId": "6a38b5da-93bd-480d-aae9-e8705cf3c85c"
+	},
+	"type": "DATABASE"
+}

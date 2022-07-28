@@ -1,0 +1,198 @@
+{
+	"name": "ASA_PD_FC_DentalHeader_Data",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "CareAbout SFTP",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"FileName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "James"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().FileName",
+					"type": "Expression"
+				},
+				"folderPath": "FIDELIS/dataFiles",
+				"container": "data"
+			},
+			"columnDelimiter": "|",
+			"rowDelimiter": "\n",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "claim_id",
+				"type": "String"
+			},
+			{
+				"name": "billing_provider_id",
+				"type": "String"
+			},
+			{
+				"name": "rendering_provider_id",
+				"type": "String"
+			},
+			{
+				"name": "first_date_of_service",
+				"type": "String"
+			},
+			{
+				"name": "last_date_of_service",
+				"type": "String"
+			},
+			{
+				"name": "member_id",
+				"type": "String"
+			},
+			{
+				"name": "patient_dob",
+				"type": "String"
+			},
+			{
+				"name": "patient_gender",
+				"type": "String"
+			},
+			{
+				"name": "patient_zip_code",
+				"type": "String"
+			},
+			{
+				"name": "line_of_business",
+				"type": "String"
+			},
+			{
+				"name": "product",
+				"type": "String"
+			},
+			{
+				"name": "blue_card_identifier",
+				"type": "String"
+			},
+			{
+				"name": "total_charge",
+				"type": "String"
+			},
+			{
+				"name": "allowed_amount",
+				"type": "String"
+			},
+			{
+				"name": "member_responsibility",
+				"type": "String"
+			},
+			{
+				"name": "plan_paid",
+				"type": "String"
+			},
+			{
+				"name": "icd_version",
+				"type": "String"
+			},
+			{
+				"name": "diagnosis_1",
+				"type": "String"
+			},
+			{
+				"name": "diagnosis_2",
+				"type": "String"
+			},
+			{
+				"name": "diagnosis_3",
+				"type": "String"
+			},
+			{
+				"name": "diagnosis_4",
+				"type": "String"
+			},
+			{
+				"name": "diagnosis_5",
+				"type": "String"
+			},
+			{
+				"name": "diagnosis_6",
+				"type": "String"
+			},
+			{
+				"name": "diagnosis_7",
+				"type": "String"
+			},
+			{
+				"name": "diagnosis_8",
+				"type": "String"
+			},
+			{
+				"name": "diagnosis_9",
+				"type": "String"
+			},
+			{
+				"name": "diagnosis_10",
+				"type": "String"
+			},
+			{
+				"name": "diagnosis_11",
+				"type": "String"
+			},
+			{
+				"name": "payment_methodology",
+				"type": "String"
+			},
+			{
+				"name": "source_system",
+				"type": "String"
+			},
+			{
+				"name": "primary_payer",
+				"type": "String"
+			},
+			{
+				"name": "adjustment_claim_indicator",
+				"type": "String"
+			},
+			{
+				"name": "adjusted_claim_id",
+				"type": "String"
+			},
+			{
+				"name": "employer_id",
+				"type": "String"
+			},
+			{
+				"name": "paid_date",
+				"type": "String"
+			},
+			{
+				"name": "posted_date",
+				"type": "String"
+			},
+			{
+				"name": "claim_status",
+				"type": "String"
+			},
+			{
+				"name": "denial_reason",
+				"type": "String"
+			},
+			{
+				"name": "member_pcp_id",
+				"type": "String"
+			},
+			{
+				"name": "member_pcp_id_npi",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

@@ -1,0 +1,375 @@
+{
+	"name": "testDyn",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetFiles",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "MEMfolder",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "ForEachfile",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GetFiles",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetFiles').output.childItems",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy files",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"fileListPath": {
+											"value": "@activity('GetFiles').output.childItems",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "SqlPoolSink",
+									"allowCopyCommand": true
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "COMPANY_CODE",
+												"type": "String"
+											},
+											"sink": {
+												"name": "COMPANY_CODE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "LINE_OF_BUSINESS_DESC",
+												"type": "String"
+											},
+											"sink": {
+												"name": "LINE_OF_BUSINESS_DESC",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "MEDICAID_NO",
+												"type": "String"
+											},
+											"sink": {
+												"name": "MEDICAID_NO",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "MEDICARE_NO",
+												"type": "String"
+											},
+											"sink": {
+												"name": "MEDICARE_NO",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SUBSCRIBER_ID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SUBSCRIBER_ID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "MEMB_FIRST_NAME",
+												"type": "String"
+											},
+											"sink": {
+												"name": "MEMB_FIRST_NAME",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "MEMB_MIDDLE_INITIAL",
+												"type": "String"
+											},
+											"sink": {
+												"name": "MEMB_MIDDLE_INITIAL",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "MEMB_LAST_NAME",
+												"type": "String"
+											},
+											"sink": {
+												"name": "MEMB_LAST_NAME",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "GENDER",
+												"type": "String"
+											},
+											"sink": {
+												"name": "GENDER",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "DOB",
+												"type": "String"
+											},
+											"sink": {
+												"name": "DOB",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "MEMB_ADDRESS_LINE_1",
+												"type": "String"
+											},
+											"sink": {
+												"name": "MEMB_ADDRESS_LINE_1",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "MEMB_ADDRESS_LINE_2",
+												"type": "String"
+											},
+											"sink": {
+												"name": "MEMB_ADDRESS_LINE_2",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "MEMB_CITY",
+												"type": "String"
+											},
+											"sink": {
+												"name": "MEMB_CITY",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "MEMB_STATE",
+												"type": "String"
+											},
+											"sink": {
+												"name": "MEMB_STATE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "MEMB_ZIP",
+												"type": "String"
+											},
+											"sink": {
+												"name": "MEMB_ZIP",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "PROVIDER_ID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PROVIDER_ID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "NATIONAL_PROVIDER_ID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "NATIONAL_PROVIDER_ID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "MPIN",
+												"type": "String"
+											},
+											"sink": {
+												"name": "MPIN",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "PROV_FULL_NAME",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PROV_FULL_NAME",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "HOME_PHONE_NUMBER",
+												"type": "String"
+											},
+											"sink": {
+												"name": "HOME_PHONE_NUMBER",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "IPRO_RISK_SCORE",
+												"type": "String"
+											},
+											"sink": {
+												"name": "IPRO_RISK_SCORE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "PROV_TAX_ID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PROV_TAX_ID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ELIG_START_DATE",
+												"type": "String"
+											},
+											"sink": {
+												"name": "ELIG_START_DATE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ELIG_END_DATE",
+												"type": "String"
+											},
+											"sink": {
+												"name": "ELIG_END_DATE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "DIAMOND_ID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "DIAMOND_ID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ETHNIC_CODE_DESC",
+												"type": "String"
+											},
+											"sink": {
+												"name": "ETHNIC_CODE_DESC",
+												"type": "String"
+											}
+										}
+									]
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MEMfolder",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "MEMtbl",
+									"type": "DatasetReference"
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "James/Tests"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-07-21T15:26:37Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

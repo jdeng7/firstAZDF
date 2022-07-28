@@ -1,0 +1,133 @@
+{
+	"name": "MEMtest",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "CareAbout SFTP",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "James"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "RENDRCARENY_202202_HIST_MEM_CAID.txt",
+				"container": "data"
+			},
+			"columnDelimiter": "|",
+			"rowDelimiter": "\n",
+			"escapeChar": "\"",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "COMPANY_CODE",
+				"type": "String"
+			},
+			{
+				"name": "LINE_OF_BUSINESS_DESC",
+				"type": "String"
+			},
+			{
+				"name": "MEDICAID_NO",
+				"type": "String"
+			},
+			{
+				"name": "MEDICARE_NO",
+				"type": "String"
+			},
+			{
+				"name": "SUBSCRIBER_ID",
+				"type": "String"
+			},
+			{
+				"name": "MEMB_FIRST_NAME",
+				"type": "String"
+			},
+			{
+				"name": "MEMB_MIDDLE_INITIAL",
+				"type": "String"
+			},
+			{
+				"name": "MEMB_LAST_NAME",
+				"type": "String"
+			},
+			{
+				"name": "GENDER",
+				"type": "String"
+			},
+			{
+				"name": "DOB",
+				"type": "String"
+			},
+			{
+				"name": "MEMB_ADDRESS_LINE_1",
+				"type": "String"
+			},
+			{
+				"name": "MEMB_ADDRESS_LINE_2",
+				"type": "String"
+			},
+			{
+				"name": "MEMB_CITY",
+				"type": "String"
+			},
+			{
+				"name": "MEMB_STATE",
+				"type": "String"
+			},
+			{
+				"name": "MEMB_ZIP",
+				"type": "String"
+			},
+			{
+				"name": "PROVIDER_ID",
+				"type": "String"
+			},
+			{
+				"name": "NATIONAL_PROVIDER_ID",
+				"type": "String"
+			},
+			{
+				"name": "MPIN",
+				"type": "String"
+			},
+			{
+				"name": "PROV_FULL_NAME",
+				"type": "String"
+			},
+			{
+				"name": "HOME_PHONE_NUMBER",
+				"type": "String"
+			},
+			{
+				"name": "IPRO_RISK_SCORE",
+				"type": "String"
+			},
+			{
+				"name": "PROV_TAX_ID",
+				"type": "String"
+			},
+			{
+				"name": "ELIG_START_DATE",
+				"type": "String"
+			},
+			{
+				"name": "ELIG_END_DATE",
+				"type": "String"
+			},
+			{
+				"name": "DIAMOND_ID",
+				"type": "String"
+			},
+			{
+				"name": "ETHNIC_CODE_DESC",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

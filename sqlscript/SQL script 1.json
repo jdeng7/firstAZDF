@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "CREATE TABLE [dbo].[NYSOHtest]\n(\n    Period varchar(50) not null,\n    LOB varchar(50) not null,\n    [Plan Name] varchar(50) not null,\n    NYSOH varchar(50) not null,\n    WMS varchar(50) not null,\n    [Grand Total] varchar(50) not null\n)\nWITH\n(\n    DISTRIBUTION = HASH (Period),\n    CLUSTERED COLUMNSTORE INDEX\n)\nGO\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "cpsqlpool",
+				"poolName": "cpsqlpool"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

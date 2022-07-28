@@ -1,0 +1,125 @@
+{
+	"name": "MEMtbl",
+	"properties": {
+		"folder": {
+			"name": "James"
+		},
+		"annotations": [],
+		"type": "SqlPoolTable",
+		"schema": [
+			{
+				"name": "COMPANY_CODE",
+				"type": "nvarchar"
+			},
+			{
+				"name": "LINE_OF_BUSINESS_DESC",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MEDICAID_NO",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MEDICARE_NO",
+				"type": "nvarchar"
+			},
+			{
+				"name": "SUBSCRIBER_ID",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MEMB_FIRST_NAME",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MEMB_MIDDLE_INITIAL",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MEMB_LAST_NAME",
+				"type": "nvarchar"
+			},
+			{
+				"name": "GENDER",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DOB",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MEMB_ADDRESS_LINE_1",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MEMB_ADDRESS_LINE_2",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MEMB_CITY",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MEMB_STATE",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MEMB_ZIP",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PROVIDER_ID",
+				"type": "nvarchar"
+			},
+			{
+				"name": "NATIONAL_PROVIDER_ID",
+				"type": "nvarchar"
+			},
+			{
+				"name": "MPIN",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PROV_FULL_NAME",
+				"type": "nvarchar"
+			},
+			{
+				"name": "HOME_PHONE_NUMBER",
+				"type": "nvarchar"
+			},
+			{
+				"name": "IPRO_RISK_SCORE",
+				"type": "nvarchar"
+			},
+			{
+				"name": "PROV_TAX_ID",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ELIG_START_DATE",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ELIG_END_DATE",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DIAMOND_ID",
+				"type": "nvarchar"
+			},
+			{
+				"name": "ETHNIC_CODE_DESC",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "RENDRCARENY_HIST_MEM_CAID"
+		},
+		"sqlPool": {
+			"referenceName": "cpsqlpool",
+			"type": "SqlPoolReference"
+		}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}
