@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "cpsynapsews"
+		},
+		"CareAbout SFTP_connectionString": {
+			"value": ""
+		},
+		"PDFCDH_connectionString": {
+			"value": ""
+		},
+		"Rendrcare SFTP_accountKey": {
+			"value": ""
+		},
+		"cpsynapsews-WorkspaceDefaultSqlServer_connectionString": {
+			"value": ""
+		},
+		"Rendrcare SFTP_properties_typeProperties_url": {
+			"value": "https://rendrfileservice.dfs.core.windows.net/"
+		},
+		"cpsynapsews-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://cpdlstorage.dfs.core.windows.net"
+		}
+	}
+}

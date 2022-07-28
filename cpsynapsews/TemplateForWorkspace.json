@@ -1,0 +1,2276 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "cpsynapsews"
+		},
+		"CareAbout SFTP_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'CareAbout SFTP'"
+		},
+		"PDFCDH_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'PDFCDH'"
+		},
+		"Rendrcare SFTP_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'Rendrcare SFTP'"
+		},
+		"cpsynapsews-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'cpsynapsews-WorkspaceDefaultSqlServer'"
+		},
+		"Rendrcare SFTP_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://rendrfileservice.dfs.core.windows.net/"
+		},
+		"cpsynapsews-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://cpdlstorage.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/PDFCDH')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata1",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "PDFCDHfolder",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Metadata1').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "If Condition1",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Stored procedure4",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@bool(startswith(item().name,'FidelisCare_Prod_DentalHeader_FULL_RENDRCARE'))",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "PDFCDentalHeader",
+												"type": "ExecuteDataFlow",
+												"dependsOn": [
+													{
+														"activity": "Stored procedure2",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "1.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataflow": {
+														"referenceName": "PDFCDentalHeader",
+														"type": "DataFlowReference",
+														"parameters": {
+															"FileName": {
+																"value": "'@{variables('FN2')}'",
+																"type": "Expression"
+															}
+														},
+														"datasetParameters": {
+															"PDFCDentalHeader": {
+																"FileName": {
+																	"value": "@variables('FN2')",
+																	"type": "Expression"
+																}
+															},
+															"PDFCDentalHeaderTbl": {}
+														}
+													},
+													"staging": {
+														"linkedService": {
+															"referenceName": "cpsynapsews-WorkspaceDefaultStorage",
+															"type": "LinkedServiceReference"
+														},
+														"folderPath": "cpdlfilesystem/synapse"
+													},
+													"compute": {
+														"coreCount": 8,
+														"computeType": "General"
+													},
+													"traceLevel": "Fine"
+												}
+											},
+											{
+												"name": "Set variable3",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "FN2",
+													"value": {
+														"value": "@item().name",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "Stored procedure2",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "Set variable3",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[dbo].[insertLog]",
+													"storedProcedureParameters": {
+														"msg": {
+															"value": {
+																"value": "@concat('var3: ',variables('FN2'))",
+																"type": "Expression"
+															},
+															"type": "String"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "cpsynapsews-WorkspaceDefaultSqlServer",
+													"type": "LinkedServiceReference",
+													"parameters": {
+														"DBName": "cpsqlpool"
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "Set variable2",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "FileName",
+										"value": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Stored procedure4",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "Set variable2",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[dbo].[insertLog]",
+										"storedProcedureParameters": {
+											"msg": {
+												"value": {
+													"value": "@concat('Var2: ',variables('FileName'))",
+													"type": "Expression"
+												}
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "cpsynapsews-WorkspaceDefaultSqlServer",
+										"type": "LinkedServiceReference",
+										"parameters": {
+											"DBName": "cpsqlpool"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"FileName": {
+						"type": "String"
+					},
+					"FN2": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "James"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-07-21T20:08:31Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/PDFCDHfolder')]",
+				"[concat(variables('workspaceId'), '/linkedServices/cpsynapsews-WorkspaceDefaultSqlServer')]",
+				"[concat(variables('workspaceId'), '/dataflows/PDFCDentalHeader')]",
+				"[concat(variables('workspaceId'), '/linkedServices/cpsynapsews-WorkspaceDefaultStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/testDyn')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetFiles",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "MEMfolder",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEachfile",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GetFiles",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetFiles').output.childItems",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy files",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"fileListPath": {
+													"value": "@activity('GetFiles').output.childItems",
+													"type": "Expression"
+												},
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "SqlPoolSink",
+											"allowCopyCommand": true,
+											"copyCommandSettings": {}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"name": "COMPANY_CODE",
+														"type": "String"
+													},
+													"sink": {
+														"name": "COMPANY_CODE",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LINE_OF_BUSINESS_DESC",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LINE_OF_BUSINESS_DESC",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "MEDICAID_NO",
+														"type": "String"
+													},
+													"sink": {
+														"name": "MEDICAID_NO",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "MEDICARE_NO",
+														"type": "String"
+													},
+													"sink": {
+														"name": "MEDICARE_NO",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "SUBSCRIBER_ID",
+														"type": "String"
+													},
+													"sink": {
+														"name": "SUBSCRIBER_ID",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "MEMB_FIRST_NAME",
+														"type": "String"
+													},
+													"sink": {
+														"name": "MEMB_FIRST_NAME",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "MEMB_MIDDLE_INITIAL",
+														"type": "String"
+													},
+													"sink": {
+														"name": "MEMB_MIDDLE_INITIAL",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "MEMB_LAST_NAME",
+														"type": "String"
+													},
+													"sink": {
+														"name": "MEMB_LAST_NAME",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "GENDER",
+														"type": "String"
+													},
+													"sink": {
+														"name": "GENDER",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "DOB",
+														"type": "String"
+													},
+													"sink": {
+														"name": "DOB",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "MEMB_ADDRESS_LINE_1",
+														"type": "String"
+													},
+													"sink": {
+														"name": "MEMB_ADDRESS_LINE_1",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "MEMB_ADDRESS_LINE_2",
+														"type": "String"
+													},
+													"sink": {
+														"name": "MEMB_ADDRESS_LINE_2",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "MEMB_CITY",
+														"type": "String"
+													},
+													"sink": {
+														"name": "MEMB_CITY",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "MEMB_STATE",
+														"type": "String"
+													},
+													"sink": {
+														"name": "MEMB_STATE",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "MEMB_ZIP",
+														"type": "String"
+													},
+													"sink": {
+														"name": "MEMB_ZIP",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "PROVIDER_ID",
+														"type": "String"
+													},
+													"sink": {
+														"name": "PROVIDER_ID",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "NATIONAL_PROVIDER_ID",
+														"type": "String"
+													},
+													"sink": {
+														"name": "NATIONAL_PROVIDER_ID",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "MPIN",
+														"type": "String"
+													},
+													"sink": {
+														"name": "MPIN",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "PROV_FULL_NAME",
+														"type": "String"
+													},
+													"sink": {
+														"name": "PROV_FULL_NAME",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "HOME_PHONE_NUMBER",
+														"type": "String"
+													},
+													"sink": {
+														"name": "HOME_PHONE_NUMBER",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "IPRO_RISK_SCORE",
+														"type": "String"
+													},
+													"sink": {
+														"name": "IPRO_RISK_SCORE",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "PROV_TAX_ID",
+														"type": "String"
+													},
+													"sink": {
+														"name": "PROV_TAX_ID",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "ELIG_START_DATE",
+														"type": "String"
+													},
+													"sink": {
+														"name": "ELIG_START_DATE",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "ELIG_END_DATE",
+														"type": "String"
+													},
+													"sink": {
+														"name": "ELIG_END_DATE",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "DIAMOND_ID",
+														"type": "String"
+													},
+													"sink": {
+														"name": "DIAMOND_ID",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "ETHNIC_CODE_DESC",
+														"type": "String"
+													},
+													"sink": {
+														"name": "ETHNIC_CODE_DESC",
+														"type": "String"
+													}
+												}
+											]
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MEMfolder",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "MEMtbl",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"folder": {
+					"name": "James/Tests"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-07-21T15:26:37Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/MEMfolder')]",
+				"[concat(variables('workspaceId'), '/datasets/MEMtbl')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/testFolder')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "CpFCDH",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"allowCopyCommand": true,
+								"copyCommandSettings": {}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "PDFCDHfolder",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ASA_PD_FC_DentalHeader_Tbl",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"folder": {
+					"name": "James/Tests"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-07-28T03:26:36Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/PDFCDHfolder')]",
+				"[concat(variables('workspaceId'), '/datasets/ASA_PD_FC_DentalHeader_Tbl')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ASATblAgg')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "cpsynapsews-WorkspaceDefaultSqlServer",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"DBName": "cpsqlpool"
+					}
+				},
+				"folder": {
+					"name": "James"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "AggName",
+						"type": "varchar"
+					},
+					{
+						"name": "AggNumber",
+						"type": "float",
+						"precision": 15
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "demoAgg"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/cpsynapsews-WorkspaceDefaultSqlServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ASA_PD_FC_DentalHeader_Data')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "CareAbout SFTP",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "James"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": "FIDELIS/dataFiles",
+						"container": "data"
+					},
+					"columnDelimiter": "|",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "claim_id",
+						"type": "String"
+					},
+					{
+						"name": "billing_provider_id",
+						"type": "String"
+					},
+					{
+						"name": "rendering_provider_id",
+						"type": "String"
+					},
+					{
+						"name": "first_date_of_service",
+						"type": "String"
+					},
+					{
+						"name": "last_date_of_service",
+						"type": "String"
+					},
+					{
+						"name": "member_id",
+						"type": "String"
+					},
+					{
+						"name": "patient_dob",
+						"type": "String"
+					},
+					{
+						"name": "patient_gender",
+						"type": "String"
+					},
+					{
+						"name": "patient_zip_code",
+						"type": "String"
+					},
+					{
+						"name": "line_of_business",
+						"type": "String"
+					},
+					{
+						"name": "product",
+						"type": "String"
+					},
+					{
+						"name": "blue_card_identifier",
+						"type": "String"
+					},
+					{
+						"name": "total_charge",
+						"type": "String"
+					},
+					{
+						"name": "allowed_amount",
+						"type": "String"
+					},
+					{
+						"name": "member_responsibility",
+						"type": "String"
+					},
+					{
+						"name": "plan_paid",
+						"type": "String"
+					},
+					{
+						"name": "icd_version",
+						"type": "String"
+					},
+					{
+						"name": "diagnosis_1",
+						"type": "String"
+					},
+					{
+						"name": "diagnosis_2",
+						"type": "String"
+					},
+					{
+						"name": "diagnosis_3",
+						"type": "String"
+					},
+					{
+						"name": "diagnosis_4",
+						"type": "String"
+					},
+					{
+						"name": "diagnosis_5",
+						"type": "String"
+					},
+					{
+						"name": "diagnosis_6",
+						"type": "String"
+					},
+					{
+						"name": "diagnosis_7",
+						"type": "String"
+					},
+					{
+						"name": "diagnosis_8",
+						"type": "String"
+					},
+					{
+						"name": "diagnosis_9",
+						"type": "String"
+					},
+					{
+						"name": "diagnosis_10",
+						"type": "String"
+					},
+					{
+						"name": "diagnosis_11",
+						"type": "String"
+					},
+					{
+						"name": "payment_methodology",
+						"type": "String"
+					},
+					{
+						"name": "source_system",
+						"type": "String"
+					},
+					{
+						"name": "primary_payer",
+						"type": "String"
+					},
+					{
+						"name": "adjustment_claim_indicator",
+						"type": "String"
+					},
+					{
+						"name": "adjusted_claim_id",
+						"type": "String"
+					},
+					{
+						"name": "employer_id",
+						"type": "String"
+					},
+					{
+						"name": "paid_date",
+						"type": "String"
+					},
+					{
+						"name": "posted_date",
+						"type": "String"
+					},
+					{
+						"name": "claim_status",
+						"type": "String"
+					},
+					{
+						"name": "denial_reason",
+						"type": "String"
+					},
+					{
+						"name": "member_pcp_id",
+						"type": "String"
+					},
+					{
+						"name": "member_pcp_id_npi",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/CareAbout SFTP')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ASA_PD_FC_DentalHeader_Tbl')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "cpsynapsews-WorkspaceDefaultSqlServer",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"DBName": "cpsqlpool"
+					}
+				},
+				"folder": {
+					"name": "James"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "FileName",
+						"type": "varchar"
+					},
+					{
+						"name": "claim_id",
+						"type": "varchar"
+					},
+					{
+						"name": "billing_provider_id",
+						"type": "varchar"
+					},
+					{
+						"name": "rendering_provider_id",
+						"type": "varchar"
+					},
+					{
+						"name": "first_date_of_service",
+						"type": "varchar"
+					},
+					{
+						"name": "last_date_of_service",
+						"type": "varchar"
+					},
+					{
+						"name": "member_id",
+						"type": "varchar"
+					},
+					{
+						"name": "patient_dob",
+						"type": "varchar"
+					},
+					{
+						"name": "patient_gender",
+						"type": "varchar"
+					},
+					{
+						"name": "patient_zip_code",
+						"type": "varchar"
+					},
+					{
+						"name": "line_of_business",
+						"type": "varchar"
+					},
+					{
+						"name": "product",
+						"type": "varchar"
+					},
+					{
+						"name": "blue_card_identifier",
+						"type": "varchar"
+					},
+					{
+						"name": "total_charge",
+						"type": "varchar"
+					},
+					{
+						"name": "allowed_amount",
+						"type": "varchar"
+					},
+					{
+						"name": "member_responsibility",
+						"type": "varchar"
+					},
+					{
+						"name": "plan_paid",
+						"type": "varchar"
+					},
+					{
+						"name": "icd_version",
+						"type": "varchar"
+					},
+					{
+						"name": "diagnosis_1",
+						"type": "varchar"
+					},
+					{
+						"name": "diagnosis_2",
+						"type": "varchar"
+					},
+					{
+						"name": "diagnosis_3",
+						"type": "varchar"
+					},
+					{
+						"name": "diagnosis_4",
+						"type": "varchar"
+					},
+					{
+						"name": "diagnosis_5",
+						"type": "varchar"
+					},
+					{
+						"name": "diagnosis_6",
+						"type": "varchar"
+					},
+					{
+						"name": "diagnosis_7",
+						"type": "varchar"
+					},
+					{
+						"name": "diagnosis_8",
+						"type": "varchar"
+					},
+					{
+						"name": "diagnosis_9",
+						"type": "varchar"
+					},
+					{
+						"name": "diagnosis_10",
+						"type": "varchar"
+					},
+					{
+						"name": "diagnosis_11",
+						"type": "varchar"
+					},
+					{
+						"name": "payment_methodology",
+						"type": "varchar"
+					},
+					{
+						"name": "source_system",
+						"type": "varchar"
+					},
+					{
+						"name": "primary_payer",
+						"type": "varchar"
+					},
+					{
+						"name": "adjustment_claim_indicator",
+						"type": "varchar"
+					},
+					{
+						"name": "adjusted_claim_id",
+						"type": "varchar"
+					},
+					{
+						"name": "employer_id",
+						"type": "varchar"
+					},
+					{
+						"name": "paid_date",
+						"type": "varchar"
+					},
+					{
+						"name": "posted_date",
+						"type": "varchar"
+					},
+					{
+						"name": "claim_status",
+						"type": "varchar"
+					},
+					{
+						"name": "denial_reason",
+						"type": "varchar"
+					},
+					{
+						"name": "member_pcp_id",
+						"type": "varchar"
+					},
+					{
+						"name": "member_pcp_id_npi",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "PAYOR_DATA",
+					"table": "FidelisCare_DentalHeader_stg"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/cpsynapsews-WorkspaceDefaultSqlServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/MEMfolder')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "CareAbout SFTP",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "James"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "UHCCAID",
+						"container": "data"
+					},
+					"columnDelimiter": "|",
+					"rowDelimiter": "\n",
+					"escapeChar": "\"",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "COMPANY_CODE",
+						"type": "String"
+					},
+					{
+						"name": "LINE_OF_BUSINESS_DESC",
+						"type": "String"
+					},
+					{
+						"name": "MEDICAID_NO",
+						"type": "String"
+					},
+					{
+						"name": "MEDICARE_NO",
+						"type": "String"
+					},
+					{
+						"name": "SUBSCRIBER_ID",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_FIRST_NAME",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_MIDDLE_INITIAL",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_LAST_NAME",
+						"type": "String"
+					},
+					{
+						"name": "GENDER",
+						"type": "String"
+					},
+					{
+						"name": "DOB",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_ADDRESS_LINE_1",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_ADDRESS_LINE_2",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_CITY",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_STATE",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_ZIP",
+						"type": "String"
+					},
+					{
+						"name": "PROVIDER_ID",
+						"type": "String"
+					},
+					{
+						"name": "NATIONAL_PROVIDER_ID",
+						"type": "String"
+					},
+					{
+						"name": "MPIN",
+						"type": "String"
+					},
+					{
+						"name": "PROV_FULL_NAME",
+						"type": "String"
+					},
+					{
+						"name": "HOME_PHONE_NUMBER",
+						"type": "String"
+					},
+					{
+						"name": "IPRO_RISK_SCORE",
+						"type": "String"
+					},
+					{
+						"name": "PROV_TAX_ID",
+						"type": "String"
+					},
+					{
+						"name": "ELIG_START_DATE",
+						"type": "String"
+					},
+					{
+						"name": "ELIG_END_DATE",
+						"type": "String"
+					},
+					{
+						"name": "DIAMOND_ID",
+						"type": "String"
+					},
+					{
+						"name": "ETHNIC_CODE_DESC",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/CareAbout SFTP')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/MEMtbl')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "James"
+				},
+				"annotations": [],
+				"type": "SqlPoolTable",
+				"schema": [
+					{
+						"name": "COMPANY_CODE",
+						"type": "nvarchar"
+					},
+					{
+						"name": "LINE_OF_BUSINESS_DESC",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MEDICAID_NO",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MEDICARE_NO",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SUBSCRIBER_ID",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MEMB_FIRST_NAME",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MEMB_MIDDLE_INITIAL",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MEMB_LAST_NAME",
+						"type": "nvarchar"
+					},
+					{
+						"name": "GENDER",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DOB",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MEMB_ADDRESS_LINE_1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MEMB_ADDRESS_LINE_2",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MEMB_CITY",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MEMB_STATE",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MEMB_ZIP",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PROVIDER_ID",
+						"type": "nvarchar"
+					},
+					{
+						"name": "NATIONAL_PROVIDER_ID",
+						"type": "nvarchar"
+					},
+					{
+						"name": "MPIN",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PROV_FULL_NAME",
+						"type": "nvarchar"
+					},
+					{
+						"name": "HOME_PHONE_NUMBER",
+						"type": "nvarchar"
+					},
+					{
+						"name": "IPRO_RISK_SCORE",
+						"type": "nvarchar"
+					},
+					{
+						"name": "PROV_TAX_ID",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ELIG_START_DATE",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ELIG_END_DATE",
+						"type": "nvarchar"
+					},
+					{
+						"name": "DIAMOND_ID",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ETHNIC_CODE_DESC",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "RENDRCARENY_HIST_MEM_CAID"
+				},
+				"sqlPool": {
+					"referenceName": "cpsqlpool",
+					"type": "SqlPoolReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/sqlPools/cpsqlpool')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/MEMtest')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "CareAbout SFTP",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "James"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "RENDRCARENY_202202_HIST_MEM_CAID.txt",
+						"container": "data"
+					},
+					"columnDelimiter": "|",
+					"rowDelimiter": "\n",
+					"escapeChar": "\"",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "COMPANY_CODE",
+						"type": "String"
+					},
+					{
+						"name": "LINE_OF_BUSINESS_DESC",
+						"type": "String"
+					},
+					{
+						"name": "MEDICAID_NO",
+						"type": "String"
+					},
+					{
+						"name": "MEDICARE_NO",
+						"type": "String"
+					},
+					{
+						"name": "SUBSCRIBER_ID",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_FIRST_NAME",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_MIDDLE_INITIAL",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_LAST_NAME",
+						"type": "String"
+					},
+					{
+						"name": "GENDER",
+						"type": "String"
+					},
+					{
+						"name": "DOB",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_ADDRESS_LINE_1",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_ADDRESS_LINE_2",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_CITY",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_STATE",
+						"type": "String"
+					},
+					{
+						"name": "MEMB_ZIP",
+						"type": "String"
+					},
+					{
+						"name": "PROVIDER_ID",
+						"type": "String"
+					},
+					{
+						"name": "NATIONAL_PROVIDER_ID",
+						"type": "String"
+					},
+					{
+						"name": "MPIN",
+						"type": "String"
+					},
+					{
+						"name": "PROV_FULL_NAME",
+						"type": "String"
+					},
+					{
+						"name": "HOME_PHONE_NUMBER",
+						"type": "String"
+					},
+					{
+						"name": "IPRO_RISK_SCORE",
+						"type": "String"
+					},
+					{
+						"name": "PROV_TAX_ID",
+						"type": "String"
+					},
+					{
+						"name": "ELIG_START_DATE",
+						"type": "String"
+					},
+					{
+						"name": "ELIG_END_DATE",
+						"type": "String"
+					},
+					{
+						"name": "DIAMOND_ID",
+						"type": "String"
+					},
+					{
+						"name": "ETHNIC_CODE_DESC",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/CareAbout SFTP')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PDFCDHfolder')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "CareAbout SFTP",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "James"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "FIDELIS/dataFiles/DentalHeader",
+						"container": "data"
+					},
+					"columnDelimiter": "|",
+					"rowDelimiter": "\n",
+					"escapeChar": "\"",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/CareAbout SFTP')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/CareAbout SFTP')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('CareAbout SFTP_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PDFCDH')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('PDFCDH_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Rendrcare SFTP')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('Rendrcare SFTP_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('Rendrcare SFTP_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/cpsynapsews-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('cpsynapsews-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/cpsynapsews-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('cpsynapsews-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/integrationRuntime1')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"description": "integrationRuntime1",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "East US",
+						"nodeSize": "Standard_D2_v3",
+						"numberOfNodes": 2,
+						"maxParallelExecutionsPerNode": 2,
+						"vNetProperties": {
+							"vNetId": "/subscriptions/8c4ae8cb-7e73-4393-a9ab-ca40eff635c6/resourceGroups/first/providers/Microsoft.Network/virtualNetworks/vnet1",
+							"subnet": "default",
+							"publicIPs": [
+								"/subscriptions/8c4ae8cb-7e73-4393-a9ab-ca40eff635c6/resourceGroups/first/providers/Microsoft.Network/publicIPAddresses/test1",
+								"/subscriptions/8c4ae8cb-7e73-4393-a9ab-ca40eff635c6/resourceGroups/first/providers/Microsoft.Network/publicIPAddresses/test2"
+							]
+						}
+					},
+					"ssisProperties": {
+						"catalogInfo": {
+							"catalogServerEndpoint": "jdcareabout.database.windows.net",
+							"catalogAdminUserName": "firstlogin",
+							"catalogAdminPassword": {
+								"type": "SecureString",
+								"value": "**********"
+							},
+							"catalogPricingTier": "S1"
+						},
+						"edition": "Standard",
+						"licenseType": "LicenseIncluded"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PDFCDentalHeader')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "James"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ASA_PD_FC_DentalHeader_Data",
+								"type": "DatasetReference"
+							},
+							"name": "PDFCDentalHeader"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ASA_PD_FC_DentalHeader_Tbl",
+								"type": "DatasetReference"
+							},
+							"name": "PDFCDentalHeaderTbl"
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"parameters{",
+						"     FileName as string",
+						"}",
+						"source(output(",
+						"          claim_id as string,",
+						"          billing_provider_id as string,",
+						"          rendering_provider_id as string,",
+						"          first_date_of_service as string,",
+						"          last_date_of_service as string,",
+						"          member_id as string,",
+						"          patient_dob as string,",
+						"          patient_gender as string,",
+						"          patient_zip_code as string,",
+						"          line_of_business as string,",
+						"          product as string,",
+						"          blue_card_identifier as string,",
+						"          total_charge as string,",
+						"          allowed_amount as string,",
+						"          member_responsibility as string,",
+						"          plan_paid as string,",
+						"          icd_version as string,",
+						"          diagnosis_1 as string,",
+						"          diagnosis_2 as string,",
+						"          diagnosis_3 as string,",
+						"          diagnosis_4 as string,",
+						"          diagnosis_5 as string,",
+						"          diagnosis_6 as string,",
+						"          diagnosis_7 as string,",
+						"          diagnosis_8 as string,",
+						"          diagnosis_9 as string,",
+						"          diagnosis_10 as string,",
+						"          diagnosis_11 as string,",
+						"          payment_methodology as string,",
+						"          source_system as string,",
+						"          primary_payer as string,",
+						"          adjustment_claim_indicator as string,",
+						"          adjusted_claim_id as string,",
+						"          employer_id as string,",
+						"          paid_date as string,",
+						"          posted_date as string,",
+						"          claim_status as string,",
+						"          denial_reason as string,",
+						"          member_pcp_id as string,",
+						"          member_pcp_id_npi as string",
+						"     ),",
+						"     allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     rowUrlColumn: 'FileName') ~> PDFCDentalHeader",
+						"PDFCDentalHeader sink(allowSchemaDrift: false,",
+						"     validateSchema: false,",
+						"     input(",
+						"          FileName as string,",
+						"          claim_id as string,",
+						"          billing_provider_id as string,",
+						"          rendering_provider_id as string,",
+						"          first_date_of_service as string,",
+						"          last_date_of_service as string,",
+						"          member_id as string,",
+						"          patient_dob as string,",
+						"          patient_gender as string,",
+						"          patient_zip_code as string,",
+						"          line_of_business as string,",
+						"          product as string,",
+						"          blue_card_identifier as string,",
+						"          total_charge as string,",
+						"          allowed_amount as string,",
+						"          member_responsibility as string,",
+						"          plan_paid as string,",
+						"          icd_version as string,",
+						"          diagnosis_1 as string,",
+						"          diagnosis_2 as string,",
+						"          diagnosis_3 as string,",
+						"          diagnosis_4 as string,",
+						"          diagnosis_5 as string,",
+						"          diagnosis_6 as string,",
+						"          diagnosis_7 as string,",
+						"          diagnosis_8 as string,",
+						"          diagnosis_9 as string,",
+						"          diagnosis_10 as string,",
+						"          diagnosis_11 as string,",
+						"          payment_methodology as string,",
+						"          source_system as string,",
+						"          primary_payer as string,",
+						"          adjustment_claim_indicator as string,",
+						"          adjusted_claim_id as string,",
+						"          employer_id as string,",
+						"          paid_date as string,",
+						"          posted_date as string,",
+						"          claim_status as string,",
+						"          denial_reason as string,",
+						"          member_pcp_id as string,",
+						"          member_pcp_id_npi as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     staged: true,",
+						"     allowCopyCommand: true,",
+						"     batchSize: 5000,",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     mapColumn(",
+						"          FileName,",
+						"          claim_id,",
+						"          billing_provider_id,",
+						"          rendering_provider_id,",
+						"          first_date_of_service,",
+						"          last_date_of_service,",
+						"          member_id,",
+						"          patient_dob,",
+						"          patient_gender,",
+						"          patient_zip_code,",
+						"          line_of_business,",
+						"          product,",
+						"          blue_card_identifier,",
+						"          total_charge,",
+						"          allowed_amount,",
+						"          member_responsibility,",
+						"          plan_paid,",
+						"          icd_version,",
+						"          diagnosis_1,",
+						"          diagnosis_2,",
+						"          diagnosis_3,",
+						"          diagnosis_4,",
+						"          diagnosis_5,",
+						"          diagnosis_6,",
+						"          diagnosis_7,",
+						"          diagnosis_8,",
+						"          diagnosis_9,",
+						"          diagnosis_10,",
+						"          diagnosis_11,",
+						"          payment_methodology,",
+						"          source_system,",
+						"          primary_payer,",
+						"          adjustment_claim_indicator,",
+						"          adjusted_claim_id,",
+						"          employer_id,",
+						"          paid_date,",
+						"          posted_date,",
+						"          claim_status,",
+						"          denial_reason,",
+						"          member_pcp_id,",
+						"          member_pcp_id_npi",
+						"     )) ~> PDFCDentalHeaderTbl"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/ASA_PD_FC_DentalHeader_Data')]",
+				"[concat(variables('workspaceId'), '/datasets/ASA_PD_FC_DentalHeader_Tbl')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "CREATE TABLE [dbo].[NYSOHtest]\n(\n    Period varchar(50) not null,\n    LOB varchar(50) not null,\n    [Plan Name] varchar(50) not null,\n    NYSOH varchar(50) not null,\n    WMS varchar(50) not null,\n    [Grand Total] varchar(50) not null\n)\nWITH\n(\n    DISTRIBUTION = HASH (Period),\n    CLUSTERED COLUMNSTORE INDEX\n)\nGO\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "cpsqlpool",
+						"poolName": "cpsqlpool"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/demoParkQuery')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://cpdlstorage.dfs.core.windows.net/cpdlfilesystem/demoPark/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Notebook 1')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "cpsparkpool",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "56g",
+					"driverCores": 8,
+					"executorMemory": "56g",
+					"executorCores": 8,
+					"numExecutors": 2,
+					"runAsWorkspaceSystemIdentity": false,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "f46c694a-9ad9-4564-b924-f5a342bd333c"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1"
+					},
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/dea20f13-b8a2-4c09-9cfe-b902ec798126/resourceGroups/AZR-SYNAPSE-RG/providers/Microsoft.Synapse/workspaces/cpsynapsews/bigDataPools/cpsparkpool",
+						"name": "cpsparkpool",
+						"type": "Spark",
+						"endpoint": "https://cpsynapsews.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/cpsparkpool",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net",
+							"authHeader": null
+						},
+						"sparkVersion": "3.1",
+						"nodeCount": 3,
+						"cores": 8,
+						"memory": 56,
+						"extraHeader": null
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"microsoft": {
+								"language": "python"
+							}
+						},
+						"source": [
+							"%%pyspark\n",
+							"spark.sql(\"CREATE TABLE IF NOT EXISTS default.demoApache USING Parquet LOCATION 'abfss://cpdlfilesystem@cpdlstorage.dfs.core.windows.net/demoPark/part-00000-2054a8b6-6224-4723-96b1-7ca3d59d6880-c000.snappy.parquet'\")"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 1
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/pysparkCrtTbl')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "cpsparkpoolhvwa",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "30g",
+					"driverCores": 4,
+					"executorMemory": "60g",
+					"executorCores": 12,
+					"numExecutors": 2,
+					"runAsWorkspaceSystemIdentity": false,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "b3598fcb-9d5f-4211-9cc5-c3be51b915f6"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1"
+					},
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/dea20f13-b8a2-4c09-9cfe-b902ec798126/resourceGroups/AZR-SYNAPSE-RG/providers/Microsoft.Synapse/workspaces/cpsynapsews/bigDataPools/cpsparkpoolhvwa",
+						"name": "cpsparkpoolhvwa",
+						"type": "Spark",
+						"endpoint": "https://cpsynapsews.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/cpsparkpoolhvwa",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net",
+							"authHeader": null
+						},
+						"sparkVersion": "3.2",
+						"nodeCount": 3,
+						"cores": 16,
+						"memory": 110,
+						"extraHeader": null
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"microsoft": {
+								"language": "python"
+							}
+						},
+						"source": [
+							"%%pyspark\n",
+							"spark.sql(\"Drop TABLE  default.demoApache \")\n",
+							"spark.sql(\"CREATE TABLE default.demoApache USING Parquet LOCATION 'abfss://cpdlfilesystem@cpdlstorage.dfs.core.windows.net/demoApache/'\")"
+						],
+						"attachments": null,
+						"outputs": [],
+						"execution_count": 1
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LakeDatabaseTest')]",
+			"type": "Microsoft.Synapse/workspaces/databases",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"Ddls": [
+					{
+						"ActionType": "CREATE",
+						"OldEntity": null,
+						"NewEntity": {
+							"Name": "LakeDatabaseTest",
+							"EntityType": "DATABASE",
+							"Origin": {
+								"Type": "SPARK"
+							},
+							"Properties": {
+								"IsSyMSCDMDatabase": true
+							},
+							"Description": "For Test",
+							"Source": {
+								"Provider": "ADLS",
+								"Location": "abfss://cpdlfilesystem@cpdlstorage.dfs.core.windows.net/LakeDatabaseTest",
+								"Properties": {
+									"FormatType": "csv",
+									"LinkedServiceName": "cpsynapsews-WorkspaceDefaultStorage"
+								}
+							},
+							"PublishStatus": "PUBLISHED",
+							"ObjectVersion": 1,
+							"ObjectId": "6a38b5da-93bd-480d-aae9-e8705cf3c85c"
+						},
+						"Source": {
+							"Type": "SPARK"
+						}
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/cpsparkpool')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 15
+				},
+				"autoScale": {
+					"enabled": true,
+					"maxNodeCount": 10,
+					"minNodeCount": 3
+				},
+				"nodeCount": 0,
+				"nodeSize": "Medium",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "3.1",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": true,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "eastus"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/cpsparkpoolhvwa')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 15
+				},
+				"autoScale": {
+					"enabled": true,
+					"maxNodeCount": 10,
+					"minNodeCount": 3
+				},
+				"nodeCount": 0,
+				"nodeSize": "Large",
+				"nodeSizeFamily": "HardwareAcceleratedGPU",
+				"sparkVersion": "3.2",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": false,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "eastus"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/cpsqlpool')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "eastus"
+		}
+	]
+}
