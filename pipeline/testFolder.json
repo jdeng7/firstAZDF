@@ -29,7 +29,9 @@
 					},
 					"sink": {
 						"type": "SqlDWSink",
-						"allowCopyCommand": true
+						"preCopyScript": "TRUNCATE TABLE [PAYOR_DATA].[FidelisCare_DentalHeader_stg]",
+						"allowCopyCommand": true,
+						"disableMetricsCollection": false
 					},
 					"enableStaging": false
 				},
