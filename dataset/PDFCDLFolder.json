@@ -1,0 +1,112 @@
+{
+	"name": "PDFCDLFolder",
+	"properties": {
+		"folder": {
+			"name": "James"
+		},
+		"annotations": [],
+		"type": "SqlPoolTable",
+		"schema": [
+			{
+				"name": "FileName",
+				"type": "varchar"
+			},
+			{
+				"name": "claim_id",
+				"type": "nvarchar"
+			},
+			{
+				"name": "claim_line",
+				"type": "nvarchar"
+			},
+			{
+				"name": "service_from_date",
+				"type": "nvarchar"
+			},
+			{
+				"name": "service_to_date",
+				"type": "nvarchar"
+			},
+			{
+				"name": "place_of_service",
+				"type": "nvarchar"
+			},
+			{
+				"name": "emergency_indicator",
+				"type": "nvarchar"
+			},
+			{
+				"name": "procedure_code",
+				"type": "nvarchar"
+			},
+			{
+				"name": "modifier_1",
+				"type": "nvarchar"
+			},
+			{
+				"name": "modifier_2",
+				"type": "nvarchar"
+			},
+			{
+				"name": "modifier_3",
+				"type": "nvarchar"
+			},
+			{
+				"name": "modifier_4",
+				"type": "nvarchar"
+			},
+			{
+				"name": "diagnosis_code_pointer",
+				"type": "nvarchar"
+			},
+			{
+				"name": "line_charge",
+				"type": "nvarchar"
+			},
+			{
+				"name": "billed_units",
+				"type": "nvarchar"
+			},
+			{
+				"name": "id_qualifier",
+				"type": "nvarchar"
+			},
+			{
+				"name": "provider_id",
+				"type": "nvarchar"
+			},
+			{
+				"name": "plan_paid",
+				"type": "nvarchar"
+			},
+			{
+				"name": "member_liability",
+				"type": "nvarchar"
+			},
+			{
+				"name": "allowed_amount",
+				"type": "nvarchar"
+			},
+			{
+				"name": "covered_units",
+				"type": "nvarchar"
+			},
+			{
+				"name": "member_responsibility",
+				"type": "nvarchar"
+			},
+			{
+				"name": "capitation_indicator",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "PAYOR_DATA",
+			"table": "FidelisCare_DentalLine_stg"
+		},
+		"sqlPool": {
+			"referenceName": "cpsqlpool",
+			"type": "SqlPoolReference"
+		}
+	}
+}
