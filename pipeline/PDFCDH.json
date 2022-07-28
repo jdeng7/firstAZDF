@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "PDFCfolder",
+						"referenceName": "PDFCDHfolder",
 						"type": "DatasetReference"
 					},
 					"fieldList": [
