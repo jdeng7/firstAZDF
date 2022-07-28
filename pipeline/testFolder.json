@@ -41,7 +41,58 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "ASA_PD_FC_DentalHeader_Tbl",
+						"referenceName": "PDFCDHTbl",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "CpFCDL",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "CpFCDH",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFileName": "*",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "SqlPoolSink",
+						"allowCopyCommand": true
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "PDFCDLFolder",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "PDFCDLTbl",
 						"type": "DatasetReference"
 					}
 				]

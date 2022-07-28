@@ -18,7 +18,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "ASA_PD_FC_DentalHeader_Tbl",
+						"referenceName": "PDFCDHTbl",
 						"type": "DatasetReference"
 					},
 					"name": "PDFCDentalHeaderTbl"

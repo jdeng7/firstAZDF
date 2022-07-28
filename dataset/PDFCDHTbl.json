@@ -1,5 +1,5 @@
 {
-	"name": "ASA_PD_FC_DentalHeader_Tbl",
+	"name": "PDFCDHTbl",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "cpsynapsews-WorkspaceDefaultSqlServer",
